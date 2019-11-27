@@ -1,0 +1,20 @@
+language: csharp
+
+matrix:
+  include:
+    - dotnet: 3.0.100
+      mono: none
+      env: DOTNETCORE=3
+
+script:
+  - dotnet build -c Release ./Divanov.FsLearn/Divanov.FsLearn.fsproj
+  - dotnet build -c Release ./Divanov.FsLearn.Test/Divanov.FsLearn.Test.fsproj
+  - dotnet run --project ./Divanov.FsLearn.Test/Divanov.FsLearn.Test.fsproj
+
+deploy:
+  skip_cleanup: true
+  provider: script
+  script:
+    - cd ./Divanov.FsLearn/bin/Release && dotnet nuget push *.nupkg -k $NUGET_FSLEARN -s $NUGET_SOURCE
+  on:
+    branch: master
