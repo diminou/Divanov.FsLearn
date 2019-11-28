@@ -16,14 +16,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="LICENSE" Pack="true" PackagePath=""/>
+    <None Include="LICENSE" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Common.fs" />
+    <Compile Include="MatrixFactoring.fs" />
     <Compile Include="Library.fs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Divanov.Prelude" Version="0.1.4" />
     <PackageReference Include="MathNet.Numerics" Version="4.9.0" />
     <PackageReference Include="MathNet.Numerics.FSharp" Version="4.9.0" />
   </ItemGroup>

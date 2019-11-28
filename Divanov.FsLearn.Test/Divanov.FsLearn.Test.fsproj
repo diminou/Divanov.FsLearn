@@ -6,11 +6,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="MatrixFactoring.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Expecto" Version="8.13.1" />
+    <PackageReference Include="Expecto.TestResults" Version="8.13.1" />
+    <PackageReference Include="MathNet.Numerics" Version="4.9.0" />
+    <PackageReference Include="MathNet.Numerics.FSharp" Version="4.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Divanov.FsLearn\Divanov.FsLearn.fsproj" />
   </ItemGroup>
 
 </Project>
