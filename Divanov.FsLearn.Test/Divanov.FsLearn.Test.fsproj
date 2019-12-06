@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <Compile Include="MatrixFactoring.fs" />
+    <Compile Include="Clustering.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
