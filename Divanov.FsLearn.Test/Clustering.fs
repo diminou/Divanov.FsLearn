@@ -25,7 +25,7 @@ let tests =
         counts
       |> ignore
       Result.map
-        (fun x -> Expect.all x ((>) 33) "No clusters of 33+ elements")
+        (fun x -> Expect.all x ((>=) 50) "No clusters of 50+ elements")
         counts
       |> ignore
   ]

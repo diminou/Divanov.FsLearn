@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>Divanov.FsLearn</PackageId>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <Authors>Dmitry Ivanov</Authors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
