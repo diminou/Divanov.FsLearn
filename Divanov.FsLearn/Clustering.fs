@@ -91,4 +91,47 @@ module KMeans =
     |> accResult
     |> Result.map Array.ofList
 
+module Spectral =
+  type Params = KMeans.Params
+  
+  let isNonNegative (mat: Matrix<double>): bool =
+    mat.ForAll(System.Func<double, bool>((<=) 0.0))
+
+  let private unsafeDMatrix(mat: Matrix<double>): Matrix<double> =
+    [| 0 .. mat.ColumnCount - 1 |]
+    |> Array.map (fun i -> (mat.Column i).Sum())
+    |> SparseMatrix.ofDiagArray
     
+
+  let dMatrix (mat: Matrix<double>): Result<Matrix<double>, System.Exception> =
+    if not (isNonNegative mat)
+    then Error <| System.Exception("distance matrix with negative values")
+    elif mat.ColumnCount = mat.RowCount
+    then Error <| System.Exception "asymmetric distance matrix"
+    elif not <| mat.IsSymmetric()
+    then Error <| System.Exception "asymmetric distance matrix"
+    else Ok <| unsafeDMatrix mat
+
+  let lMatrix (mat: Matrix<double>): Result<Matrix<double>, System.Exception> =
+    let d = dMatrix mat
+    Result.map (fun dmat -> dmat - mat) d
+
+  let lRw (mat: Matrix<double>): Result<Matrix<double>, System.Exception> =
+    let identity = SparseMatrix.identity mat.ColumnCount
+    let invD = dMatrix mat |> Result.map Matrix.inverse
+    Result.map (fun dinv -> identity - (dinv * mat)) invD
+
+  let private clusterSubv (parameters: Params) (k: int) (lrw: Matrix<double>) =
+    if k <= 0 then Error <| System.Exception "K lower than 0"
+    else
+    let eigen = Matrix.eigen lrw
+    let vecs = eigen.EigenVectors
+    let subVecs = vecs.SubMatrix(0, vecs.RowCount, 0, k)
+    let clusters = KMeans.fit parameters k subVecs
+    let classifications = Result.bind (fun centroids -> KMeans.classify subVecs centroids) clusters
+    classifications
+
+  let fit (parameters: Params) (k: int) (distances: Matrix<double>) =
+    let lrw = lRw distances
+    let clusters = Result.bind (clusterSubv parameters k) lrw
+    clusters
