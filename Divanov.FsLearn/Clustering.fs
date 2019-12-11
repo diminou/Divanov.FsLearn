@@ -106,10 +106,10 @@ module Spectral =
   let dMatrix (mat: Matrix<double>): Result<Matrix<double>, System.Exception> =
     if not (isNonNegative mat)
     then Error <| System.Exception("distance matrix with negative values")
-    elif mat.ColumnCount = mat.RowCount
-    then Error <| System.Exception "asymmetric distance matrix"
+    elif mat.ColumnCount <> mat.RowCount
+    then Error <| System.Exception "asymmetric distance matrix - shape"
     elif not <| mat.IsSymmetric()
-    then Error <| System.Exception "asymmetric distance matrix"
+    then Error <| System.Exception "asymmetric distance matrix - content"
     else Ok <| unsafeDMatrix mat
 
   let lMatrix (mat: Matrix<double>): Result<Matrix<double>, System.Exception> =
@@ -131,7 +131,7 @@ module Spectral =
     let classifications = Result.bind (fun centroids -> KMeans.classify subVecs centroids) clusters
     classifications
 
-  let fit (parameters: Params) (k: int) (distances: Matrix<double>) =
+  let fitPredict (parameters: Params) (k: int) (distances: Matrix<double>) =
     let lrw = lRw distances
     let clusters = Result.bind (clusterSubv parameters k) lrw
     clusters
