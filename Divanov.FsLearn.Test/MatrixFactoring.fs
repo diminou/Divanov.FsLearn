@@ -24,4 +24,11 @@ let tests =
       let approx = finalGuess.Approximate
       let l2 = approx - mat1 |> (fun x -> x.L2Norm())
       Expect.isLessThan l2 5.0 "The approximate is of low quality for ALS"
+
+    testCase "RandomProjections" <| fun _ ->
+      let mat1: Matrix<double> = DenseMatrix.randomStandard 10 15
+      let ps: RandomProjections.Params =
+        { MaxDimension = NonNegativeInt 6 ; Rg = System.Random(11) }
+      let projected = RandomProjections.project ps mat1
+      Expect.equal projected.ColumnCount ps.MaxDimension.Value "Could not project right"
   ]

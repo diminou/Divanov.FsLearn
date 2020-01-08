@@ -144,3 +144,34 @@ module ALS =
     [1 .. n]
     |> List.fold (fun accum _ -> step lambda accum target) o
    
+module RandomProjections =
+  
+  type Params =
+    {
+      MaxDimension: NonNegativeInt
+      Rg: System.Random
+    } with
+
+    static member Default(data: Matrix<float>, expectedDim: NonNegativeInt): Params =
+      let REL_EPSILON = 0.05
+      let absEpsilon = data.FrobeniusNorm() * REL_EPSILON
+      let recommendedT = (float expectedDim.Value) / (absEpsilon * absEpsilon) |> round |> int
+      { MaxDimension = NonNegativeInt recommendedT ; Rg = System.Random() }
+  
+  let signMatrix (parameters: Params) (dataDim: NonNegativeInt): Matrix<float> =
+      
+    let coeff (b: bool): float =
+      let t = float parameters.MaxDimension.Value
+      if b then 1.0/(sqrt t) else -1.0/(sqrt t)
+    
+    let signBits =
+      DenseMatrix.init
+        dataDim.Value
+        parameters.MaxDimension.Value
+        (fun _ _ -> parameters.Rg.Next(2) |> (<) 0 |> coeff)
+    
+    signBits
+
+  let project (parameters: Params) (data: Matrix<float>): Matrix<float> =
+    let projectionMatrix = signMatrix parameters (NonNegativeInt data.ColumnCount)
+    data * projectionMatrix
