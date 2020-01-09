@@ -172,6 +172,41 @@ module RandomProjections =
     
     signBits
 
-  let project (parameters: Params) (data: Matrix<float>): Matrix<float> =
+  let fitTransform (parameters: Params) (data: Matrix<float>): Matrix<float> =
     let projectionMatrix = signMatrix parameters (NonNegativeInt data.ColumnCount)
     data * projectionMatrix
+
+module SparseRandomProjections =
+  type Params =
+    {
+      Density : DoubleProportion ; MaxDimension : NonNegativeInt
+      Rg : System.Random
+    } with
+    static member Default(data: Matrix<_>, dimension: NonNegativeInt): Params =
+      {
+        Density = DoubleProportion (1.0 / (data.ColumnCount |> float |> sqrt))
+        MaxDimension = dimension
+        Rg = System.Random ()
+      } 
+
+  let sparseMatrix (parameters: Params) (dataDim: NonNegativeInt): Matrix<double> =
+    let unsafeDataDim = dataDim.Value
+    let unsafeTargetDim = parameters.MaxDimension.Value
+    let unsafeDensity = parameters.Density.Value
+    let s = (1.0 / unsafeDensity)
+    let valueStep = sqrt (s / (unsafeTargetDim |> float))
+    
+    let coeff (i: int) (j: int) =
+      let rnd = parameters.Rg.NextDouble()
+      let threshold1 = 1.0 / (2.0 * s)
+      let threshold2 = 1.0 - threshold1
+      if rnd < threshold1 then -valueStep
+      elif rnd < threshold2 then 0.0
+      else valueStep
+
+    SparseMatrix.init unsafeDataDim unsafeTargetDim coeff
+
+  let fitTransform (parameters: Params) (data : Matrix<double>): Matrix<double> =
+    let projectionMatrix = sparseMatrix parameters (NonNegativeInt data.ColumnCount)
+    data * projectionMatrix
+      
